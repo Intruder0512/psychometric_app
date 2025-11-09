@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Psychometric Assessment</title>
+</head>
+<body>
+<h2>Psychometric Test – 30 Questions</h2>
+<form method="POST" action="/submit">
+    <label>Name:</label><br>
+    <input type="text" name="name" required><br>
+    <label>Email:</label><br>
+    <input type="email" name="email" required><br><hr>
+
+    <!-- Example for Question 1 -->
+    <p>Q1: You promised a teammate a deliverable by 5 PM...</p>
+    <label><input type="radio" name="q1" value="A" required>A</label>
+    <label><input type="radio" name="q1" value="B">B</label>
+    <label><input type="radio" name="q1" value="C">C</label>
+    <label><input type="radio" name="q1" value="D">D</label><hr>
+
+    <!-- Repeat for Q2–Q30 (you can automate with a question list) -->
+
+    <input type="submit" value="Submit Assessment">
+</form>
+</body>
+</html>
