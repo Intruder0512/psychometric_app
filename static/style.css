@@ -1,0 +1,48 @@
+:root{
+  --bg:#0b1220;
+  --card:#101a2b;
+  --ink:#e9eefc;
+  --muted:#9bb0d3;
+  --accent:#5aa9ff;
+  --accent-2:#6ce5e8;
+  --danger:#ff5a6e;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+a{color:var(--accent);text-decoration:none}
+.wrap{max-width:1100px;margin:0 auto;padding:24px}
+.center{display:flex;align-items:center;justify-content:center;min-height:100vh}
+
+.header{display:flex;gap:16px;align-items:center;margin-bottom:16px}
+.logo{width:52px;height:52px;object-fit:contain;border-radius:10px;background:#0e1729;padding:6px;border:1px solid rgba(255,255,255,0.06)}
+.logo-lg{width:72px;height:72px;margin-bottom:12px}
+.hdr-titles h1{margin:0;font-size:22px}
+.subtitle{margin:4px 0 0 0;color:var(--muted);font-size:14px}
+
+.card{background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,0.25)}
+.card.narrow{max-width:560px}
+
+.candidate{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:8px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field input{background:#0e1729;border:1px solid rgba(255,255,255,0.08);color:var(--ink);padding:12px;border-radius:10px;outline:none}
+.field input:focus{border-color:var(--accent)}
+
+.section-title{margin:18px 0 8px 0;font-size:18px;border-left:4px solid var(--accent-2);padding-left:10px}
+
+.q{padding:14px;border:1px solid rgba(255,255,255,0.06);border-radius:12px;margin:10px 0;background:#0f1a2b}
+.q p{margin:0 0 10px 0}
+.q label{display:block;margin:6px 0;color:#c7d4f5;cursor:pointer}
+.q input[type="radio"]{accent-color:var(--accent)}
+
+.req{color:var(--danger);margin-left:4px}
+
+.actions{display:flex;justify-content:flex-end;margin-top:16px}
+.btn{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#051020;border:0;padding:12px 16px;border-radius:12px;font-weight:700;cursor:pointer;display:inline-block}
+.btn:hover{filter:brightness(1.08)}
+
+.footer{margin:18px 0 8px 0;color:var(--muted);font-size:13px;text-align:center}
+
+@media (max-width:760px){
+  .candidate{grid-template-columns:1fr}
+}

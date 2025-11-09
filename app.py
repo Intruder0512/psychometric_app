@@ -1,34 +1,53 @@
+import os
+from io import BytesIO
+from datetime import datetime
+
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
-import smtplib
 
+import pandas as pd  # for Excel export
+
+# -------- Flask app --------
 app = Flask(__name__)
 
-# ===== Database setup =====
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+# -------- Database (ephemeral on Render, OK for now) --------
+# If you later add a disk, change this path to the mounted directory.
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
+    'DATABASE_URL',
+    'sqlite:///database.db'  # render ephemeral container FS
+)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# ===== SMTP (Gmail example) =====
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'yourcompanyhr@gmail.com'
-app.config['MAIL_PASSWORD'] = 'your_app_password_here'
+# -------- SMTP via environment variables --------
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', '587'))
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True') == 'True'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')  # required
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')  # required
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER', app.config['MAIL_USERNAME'])
+HR_EMAILS = [e.strip() for e in os.getenv('HR_EMAILS', 'hrteam@example.com').split(',') if e.strip()]
+
 mail = Mail(app)
 
-# ===== DB model =====
+# -------- DB Model --------
 class Candidate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    email = db.Column(db.String(120))
-    score = db.Column(db.Integer)
-    red_flags = db.Column(db.Integer)
-    tier = db.Column(db.String(50))
+    ts = db.Column(db.DateTime, default=datetime.utcnow)
+    name = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(200), nullable=False)
+    score = db.Column(db.Integer, nullable=False)
+    red_flags = db.Column(db.Integer, nullable=False)
+    tier = db.Column(db.String(50), nullable=False)
+    # Store raw answers as a simple JSON-ish string for quick review (optional)
+    answers_blob = db.Column(db.Text, nullable=False)
 
-db.create_all()
+# Create tables with a proper app context (fixes your Render error)
+with app.app_context():
+    db.create_all()
 
-# ======= Scoring Key =======
+# -------- Scoring maps --------
 scoring = {
     1: {'B':4}, 2:{'C':4,'B':1}, 3:{'C':4,'B':1,'D':1}, 4:{'C':4,'B':1},
     5:{'B':4}, 6:{'C':4}, 7:{'C':4}, 8:{'C':4,'D':1}, 9:{'A':4},
@@ -49,32 +68,17 @@ red_flag_map = {
     27:['A','C','D'], 28:['C','D'], 29:['C','D'], 30:['C','D']
 }
 
-# ======= Helper: evaluate answers =======
-def evaluate(answers):
+# -------- Helpers --------
+def evaluate(answers_dict):
     score, red_flags = 0, 0
-    for q_num, ans in answers.items():
-        qn = int(q_num.replace('q',''))
-        score += scoring.get(qn, {}).get(ans, 0)
-        if ans in red_flag_map.get(qn, []):
+    for i in range(1, 30 + 1):
+        ans = answers_dict.get(f'q{i}')
+        score += scoring.get(i, {}).get(ans, 0)
+        if ans in red_flag_map.get(i, []):
             red_flags += 1
-    return score, red_flags
-
-# ======= Routes =======
-@app.route('/')
-def home():
-    return render_template('index.html')
-
-@app.route('/submit', methods=['POST'])
-def submit():
-    name = request.form['name']
-    email = request.form['email']
-    answers = {k:v for k,v in request.form.items() if k.startswith('q')}
-    score, red_flags = evaluate(answers)
-
-    # Tier determination
-    if red_flags >= 2 or score < 98 or any(
-        answers.get(f'q{i}') in red_flag_map[i] for i in [1,10,15,30]
-    ):
+    # Auto-reject critical integrity questions: Q1, Q10, Q15, Q30 if red flag chosen
+    critical_fail = any(answers_dict.get(f'q{i}') in red_flag_map[i] for i in [1,10,15,30])
+    if red_flags >= 2 or score < 98 or critical_fail:
         tier = 'Rejected'
     elif score >= 105:
         tier = 'Tier 1'
@@ -82,50 +86,118 @@ def submit():
         tier = 'Tier 2'
     else:
         tier = 'Rejected'
+    return score, red_flags, tier
 
-    # Save result
-    db.session.add(Candidate(name=name, email=email, score=score, red_flags=red_flags, tier=tier))
+def make_excel_bytes(name, email, answers_dict, score, red_flags, tier):
+    """
+    Build a one-row Excel workbook in memory with all answers and metadata.
+    """
+    row = {
+        'Timestamp (UTC)': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'),
+        'Candidate Name': name,
+        'Candidate Email': email,
+        'Score': score,
+        'Red Flags': red_flags,
+        'Tier': tier
+    }
+    for i in range(1, 31):
+        row[f'Q{i}'] = answers_dict.get(f'q{i}', '')
+
+    df = pd.DataFrame([row])
+    buf = BytesIO()
+    with pd.ExcelWriter(buf, engine='openpyxl') as writer:
+        df.to_excel(writer, sheet_name='Assessment', index=False)
+    buf.seek(0)
+    return buf
+
+def send_email_to_hr(name, email, score, red_flags, tier, excel_bytes):
+    subject = f"[Assessment] {name} | {tier} | {score}/120"
+    body = (
+        f"Candidate: {name}\n"
+        f"Email: {email}\n"
+        f"Score: {score}/120\n"
+        f"Red Flags: {red_flags}\n"
+        f"Tier: {tier}\n\n"
+        "Excel file attached with full responses."
+    )
+    msg = Message(subject=subject, recipients=HR_EMAILS, body=body)
+    # attach the Excel workbook
+    msg.attach(
+        filename=f"{name.replace(' ', '_')}_assessment.xlsx",
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        data=excel_bytes.read()
+    )
+    mail.send(msg)
+
+def send_email_to_candidate(name, email, tier):
+    # Candidate should NOT see score
+    if tier == 'Rejected':
+        subject = "Thank you for applying"
+        body = (
+            f"Dear {name},\n\n"
+            "Thank you for completing our assessment and applying. "
+            "At this time, we will not be moving forward.\n\n"
+            "Best regards,\nHR Team"
+        )
+    elif tier == 'Tier 1':
+        subject = "Next steps for your application"
+        body = (
+            f"Dear {name},\n\n"
+            "Thank you for completing our assessment. We'd like to proceed to next steps.\n"
+            "Our team will reach out to schedule a quick discussion.\n\n"
+            "Best regards,\nHR Team"
+        )
+    else:  # Tier 2
+        subject = "Next steps for your application"
+        body = (
+            f"Dear {name},\n\n"
+            "Thank you for completing our assessment. "
+            "We'd like to move forward with a 30-minute conversation.\n\n"
+            "Best regards,\nHR Team"
+        )
+    msg = Message(subject=subject, recipients=[email], body=body)
+    mail.send(msg)
+
+# -------- Routes --------
+@app.route('/', methods=['GET'])
+def index():
+    return render_template('index.html')
+
+@app.route('/submit', methods=['POST'])
+def submit():
+    name = request.form.get('name', '').strip()
+    email = request.form.get('email', '').strip()
+
+    # Pull all q1..q30 answers
+    answers = {f'q{i}': request.form.get(f'q{i}') for i in range(1, 31)}
+
+    # Evaluate
+    score, red_flags, tier = evaluate(answers)
+
+    # Save to DB (ephemeral OK)
+    c = Candidate(
+        name=name,
+        email=email,
+        score=score,
+        red_flags=red_flags,
+        tier=tier,
+        answers_blob=str(answers)
+    )
+    db.session.add(c)
     db.session.commit()
 
-    # Send emails
-    send_email_to_hr(name, email, score, tier)
-    send_email_to_candidate(name, email, score, tier)
+    # Build Excel in-memory and email HR + candidate
+    xls_buf = make_excel_bytes(name, email, answers, score, red_flags, tier)
+    send_email_to_hr(name, email, score, red_flags, tier, xls_buf)
+    send_email_to_candidate(name, email, tier)
 
+    # Show thank-you page only
     return redirect(url_for('thankyou'))
 
-@app.route('/thankyou')
+@app.route('/thankyou', methods=['GET'])
 def thankyou():
     return render_template('thankyou.html')
 
-# ======= Email helpers =======
-def send_email_to_hr(name, email, score, tier):
-    msg = Message(
-        subject=f"New Psychometric Test Result: {name}",
-        sender=app.config['MAIL_USERNAME'],
-        recipients=['hrteam@yourcompany.com']
-    )
-    msg.body = f"""
-Candidate: {name}
-Email: {email}
-Score: {score}/120
-Tier: {tier}
-"""
-    mail.send(msg)
-
-def send_email_to_candidate(name, email, score, tier):
-    if tier == 'Rejected':
-        subject = "Thank you for applying to Our Company"
-        body = f"Dear {name},\n\nThank you for completing our assessment. Unfortunately, we will not proceed further.\n\nBest wishes,\nHR Team"
-    elif tier == 'Tier 1':
-        subject = "Congratulations! You're in the top 2%!"
-        body = f"Dear {name},\n\nExcellent news! You scored {score}/120 placing you in the top 2%.\nWe'll reach out soon for next steps.\n\nHR Team"
-    else:
-        subject = "Next Steps for Your Application"
-        body = f"Dear {name},\n\nYour score {score}/120 shows strong potential! We’ll schedule an interview shortly.\n\nHR Team"
-
-    msg = Message(subject=subject, sender=app.config['MAIL_USERNAME'], recipients=[email])
-    msg.body = body
-    mail.send(msg)
-
 if __name__ == '__main__':
-    app.run(debug=True)
+    # For local testing only. On Render, gunicorn runs it.
+    app.run(host='0.0.0.0', port=5000, debug=True)
