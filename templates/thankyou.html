@@ -1,8 +1,19 @@
 <!DOCTYPE html>
-<html>
-<head><title>Thank You</title></head>
-<body>
-<h2>Thank you for completing the assessment!</h2>
-<p>Your responses have been recorded. Our HR team will be in touch shortly.</p>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Thank You | {{ company }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="thankyou">
+<div class="thankyou-container">
+    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
+    <h2>Thank You, {{ name }}!</h2>
+    <p>Your assessment has been submitted successfully.</p>
+    <p>The {{ company }} HR team will contact you soon.</p>
+    <footer>
+        <p>© {{ datetime.utcnow().year }} {{ company }}. All rights reserved.</p>
+    </footer>
+</div>
 </body>
 </html>
