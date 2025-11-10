@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assessment Result – {{ company }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="main-container">
+    <header class="header">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="{{ company }}" class="logo">
+      <h1>📊 Psychometric Assessment Results</h1>
+      <p class="subtitle">Candidate: <strong>{{ name }}</strong></p>
+    </header>
+
+    <section class="instructions">
+      <h3>🧾 Summary</h3>
+      <ul>
+        <li><strong>Total Score:</strong> {{ score }}</li>
+        <li><strong>Red Flags:</strong> {{ red_flags }}</li>
+        <li><strong>Tier Classification:</strong> {{ tier }}</li>
+      </ul>
+    </section>
+
+    <div class="thankyou-box">
+      {% if tier == "Tier 1 (Elite)" %}
+      <p>🏆 Congratulations! You’ve demonstrated exceptional reliability and ownership.  
+         Our HR team will contact you soon for the next phase of evaluation.</p>
+      {% elif tier == "Tier 2 (Strong)" %}
+      <p>👏 Well done! You’ve performed strongly across key parameters.  
+         The {{ company }} team will connect shortly regarding further steps.</p>
+      {% else %}
+      <p>🙏 Thank you for your submission. While your current score doesn’t meet our cutoff,  
+         we appreciate your participation and encourage you to re-apply in the future.</p>
+      {% endif %}
+      <a href="/" class="submit-btn">Return to Home</a>
+    </div>
+
+    <footer>
+      <p>© {{ datetime.utcnow().year }} {{ company }}. All rights reserved.</p>
+    </footer>
+  </div>
+</body>
+</html>

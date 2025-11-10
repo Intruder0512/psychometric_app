@@ -1,19 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Thank You | {{ company }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thank You – {{ company }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body class="thankyou">
-<div class="thankyou-container">
-    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
-    <h2>Thank You, {{ name }}!</h2>
-    <p>Your assessment has been submitted successfully.</p>
-    <p>The {{ company }} HR team will contact you soon.</p>
+<body>
+  <div class="main-container">
+    <header class="header">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="{{ company }}" class="logo">
+      <h1>✅ Assessment Submitted Successfully</h1>
+      <p class="subtitle">Thank you, <strong>{{ name }}</strong>, for completing your assessment!</p>
+    </header>
+
+    <section class="instructions">
+      <h3>🎉 What Happens Next</h3>
+      <ul>
+        <li>Your responses have been securely submitted to the {{ company }} HR team.</li>
+        <li>Our experts will review your assessment and contact you within 3–5 working days.</li>
+        <li>If shortlisted, you’ll receive an email with the next steps for your application.</li>
+      </ul>
+    </section>
+
+    <div class="thankyou-box">
+      <p>We appreciate your effort and honesty throughout this process.<br>
+      Best wishes for your journey with <strong>{{ company }}</strong>!</p>
+      <a href="/" class="submit-btn">Return to Home</a>
+    </div>
+
     <footer>
-        <p>© {{ datetime.utcnow().year }} {{ company }}. All rights reserved.</p>
+      <p>© {{ datetime.utcnow().year }} {{ company }}. All rights reserved.</p>
     </footer>
-</div>
+  </div>
 </body>
 </html>
