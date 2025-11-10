@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kampus HR | Commitment & Results Assessment (Part 2)</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+  <div class="overlay"></div>
+  <div class="main-container">
+    <header class="header">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="Kampus HR" class="logo">
+      <h1>🎯 Ultimate Commitment & Results Assessment</h1>
+      <p class="subtitle">A 30-question evaluation to identify high-performing, reliable candidates</p>
+    </header>
+
+    <form action="/submit" method="POST" class="assessment-form">
+      <div class="section-title">PART 2: RESULTS-ORIENTATION & OWNERSHIP (Questions 16–30)</div>
+
+      <!-- Question 16 -->
+      <div class="question-card">
+        <h4>Question 16</h4>
+        <p><b>You finish all your assigned work by Thursday at 2 PM.</b></p>
+        <label><input type="radio" name="q16" value="A" required> Ask your manager: “What’s the next highest priority I can help with?”</label>
+        <label><input type="radio" name="q16" value="B"> Coast until Monday – you’ve earned it</label>
+        <label><input type="radio" name="q16" value="C"> Organize your inbox and catch up on emails</label>
+        <label><input type="radio" name="q16" value="D"> Use the time to socialize with colleagues</label>
+      </div>
+
+      <!-- Question 17 -->
+      <div class="question-card">
+        <h4>Question 17</h4>
+        <p><b>Your team encounters a major roadblock on a project.</b></p>
+        <label><input type="radio" name="q17" value="A" required> Wait for your manager to provide direction</label>
+        <label><input type="radio" name="q17" value="B"> Research three possible solutions and present them the next day</label>
+        <label><input type="radio" name="q17" value="C"> Declare the project impossible under current constraints</label>
+        <label><input type="radio" name="q17" value="D"> Focus only on your part and let others handle the blocker</label>
+      </div>
+
+      <!-- Question 18 -->
+      <div class="question-card">
+        <h4>Question 18</h4>
+        <p><b>A client gives you vague feedback: “This isn’t what I expected.” What do you do?</b></p>
+        <label><input type="radio" name="q18" value="A" required> Ask for specific clarifications to understand expectations</label>
+        <label><input type="radio" name="q18" value="B"> Assume they’re wrong and defend your work</label>
+        <label><input type="radio" name="q18" value="C"> Escalate it to your manager immediately</label>
+        <label><input type="radio" name="q18" value="D"> Redo the work completely from scratch</label>
+      </div>
+
+      <!-- Question 19 -->
+      <div class="question-card">
+        <h4>Question 19</h4>
+        <p><b>You’re assigned a project with limited guidance. What’s your approach?</b></p>
+        <label><input type="radio" name="q19" value="A" required> Wait until you get full instructions</label>
+        <label><input type="radio" name="q19" value="B"> Begin research and draft a rough plan for review</label>
+        <label><input type="radio" name="q19" value="C"> Ask others who’ve done similar work to share details</label>
+        <label><input type="radio" name="q19" value="D"> Delay until the manager follows up</label>
+      </div>
+
+      <!-- Question 20 -->
+      <div class="question-card">
+        <h4>Question 20</h4>
+        <p><b>You missed an important update from your team chat that changed priorities.</b></p>
+        <label><input type="radio" name="q20" value="A" required> Blame communication gaps</label>
+        <label><input type="radio" name="q20" value="B"> Take responsibility, read back through messages, and adjust immediately</label>
+        <label><input type="radio" name="q20" value="C"> Ignore it since it wasn’t addressed to you directly</label>
+        <label><input type="radio" name="q20" value="D"> Wait until someone corrects you</label>
+      </div>
+
+      <!-- Question 21 -->
+      <div class="question-card">
+        <h4>Question 21</h4>
+        <p><b>How do you respond to constructive criticism?</b></p>
+        <label><input type="radio" name="q21" value="A" required> Thank them and adjust based on the feedback</label>
+        <label><input type="radio" name="q21" value="B"> Defend your choices to prove your reasoning</label>
+        <label><input type="radio" name="q21" value="C"> Feel discouraged and avoid similar work</label>
+        <label><input type="radio" name="q21" value="D"> Ignore it unless repeated by your manager</label>
+      </div>
+
+      <!-- Question 22 -->
+      <div class="question-card">
+        <h4>Question 22</h4>
+        <p><b>You’re running behind on a deliverable. What’s your first step?</b></p>
+        <label><input type="radio" name="q22" value="A" required> Update your manager immediately with the cause and recovery plan</label>
+        <label><input type="radio" name="q22" value="B"> Work overtime silently to fix it</label>
+        <label><input type="radio" name="q22" value="C"> Wait until the due date to see if you can still make it</label>
+        <label><input type="radio" name="q22" value="D"> Shift blame to external dependencies</label>
+      </div>
+
+      <!-- Question 23 -->
+      <div class="question-card">
+        <h4>Question 23</h4>
+        <p><b>You’re asked to learn a new tool critical for your team’s next release.</b></p>
+        <label><input type="radio" name="q23" value="A" required> Wait until formal training is arranged</label>
+        <label><input type="radio" name="q23" value="B"> Explore tutorials and learn proactively</label>
+        <label><input type="radio" name="q23" value="C"> Ask a teammate to do it instead</label>
+        <label><input type="radio" name="q23" value="D"> Delay it because you’re busy with other work</label>
+      </div>
+
+      <!-- Question 24 -->
+      <div class="question-card">
+        <h4>Question 24</h4>
+        <p><b>You receive praise for a project completed by your team.</b></p>
+        <label><input type="radio" name="q24" value="A" required> Accept it quietly</label>
+        <label><input type="radio" name="q24" value="B"> Credit the team during the recognition</label>
+        <label><input type="radio" name="q24" value="C"> Mention you led the effort</label>
+        <label><input type="radio" name="q24" value="D"> Say nothing – people know who did what</label>
+      </div>
+
+      <!-- Question 25 -->
+      <div class="question-card">
+        <h4>Question 25</h4>
+        <p><b>How do you approach repetitive tasks that seem unimportant?</b></p>
+        <label><input type="radio" name="q25" value="A" required> Do them carelessly – they don’t matter much</label>
+        <label><input type="radio" name="q25" value="B"> Automate or simplify the process if possible</label>
+        <label><input type="radio" name="q25" value="C"> Complain but still complete them</label>
+        <label><input type="radio" name="q25" value="D"> Skip them when workload increases</label>
+      </div>
+
+      <!-- Question 26 -->
+      <div class="question-card">
+        <h4>Question 26</h4>
+        <p><b>A client presentation is due tomorrow, but another team member owns it. What’s your action?</b></p>
+        <label><input type="radio" name="q26" value="A" required> Wait to be asked for help</label>
+        <label><input type="radio" name="q26" value="B"> Offer to review or test-run the presentation for feedback</label>
+        <label><input type="radio" name="q26" value="C"> Focus on your own tasks only</label>
+        <label><input type="radio" name="q26" value="D"> Ask your manager if you can skip tomorrow’s meeting</label>
+      </div>
+
+      <!-- Question 27 -->
+      <div class="question-card">
+        <h4>Question 27</h4>
+        <p><b>What do you do when a project goal seems unrealistic?</b></p>
+        <label><input type="radio" name="q27" value="A" required> Voice your concerns early with data and alternatives</label>
+        <label><input type="radio" name="q27" value="B"> Stay silent and let management decide</label>
+        <label><input type="radio" name="q27" value="C"> Complain to peers privately</label>
+        <label><input type="radio" name="q27" value="D"> Do the bare minimum</label>
+      </div>
+
+      <!-- Question 28 -->
+      <div class="question-card">
+        <h4>Question 28</h4>
+        <p><b>Your teammate makes an error that affects delivery. How do you respond?</b></p>
+        <label><input type="radio" name="q28" value="A" required> Point it out publicly to highlight accountability</label>
+        <label><input type="radio" name="q28" value="B"> Quietly fix it and inform your manager</label>
+        <label><input type="radio" name="q28" value="C"> Help them correct it and review what went wrong</label>
+        <label><input type="radio" name="q28" value="D"> Ignore it – it’s not your job</label>
+      </div>
+
+      <!-- Question 29 -->
+      <div class="question-card">
+        <h4>Question 29</h4>
+        <p><b>How do you keep yourself motivated on long-term projects?</b></p>
+        <label><input type="radio" name="q29" value="A" required> Wait for recognition to stay energized</label>
+        <label><input type="radio" name="q29" value="B"> Break tasks into smaller wins and track progress</label>
+        <label><input type="radio" name="q29" value="C"> Focus on completing your part quickly</label>
+        <label><input type="radio" name="q29" value="D"> Take frequent breaks to stay engaged</label>
+      </div>
+
+      <!-- Question 30 -->
+      <div class="question-card">
+        <h4>Question 30</h4>
+        <p><b>You’re asked to take responsibility for a failed project.</b></p>
+        <label><input type="radio" name="q30" value="A" required> Accept accountability and outline corrective steps</label>
+        <label><input type="radio" name="q30" value="B"> Blame lack of support</label>
+        <label><input type="radio" name="q30" value="C"> Say “It wasn’t my fault”</label>
+        <label><input type="radio" name="q30" value="D"> Stay silent and wait for it to blow over</label>
+      </div>
+
+      <button type="submit" class="submit-btn">Submit Assessment ✅</button>
+    </form>
+
+    <footer>
+      <p>© {{ datetime.utcnow().year }} Kampus HR. All rights reserved.</p>
+    </footer>
+  </div>
+</body>
+</html>
